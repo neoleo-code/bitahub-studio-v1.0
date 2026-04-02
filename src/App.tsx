@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ImageDetailPage } from './components/ImageDetailPage';
+import { InstanceDetailPage } from './components/InstanceDetailPage';
 import { 
   Home, 
   Server, 
@@ -50,7 +52,11 @@ import {
   Wallet,
   Sun,
   Moon,
-  Box
+  Box,
+  Filter,
+  ExternalLink,
+  RotateCw,
+  Square
 } from 'lucide-react';
 
 // --- Mock Data ---
@@ -292,7 +298,7 @@ const TopBar = ({
   );
 };
 
-const ImageCard = ({ data, onClick }: { data: typeof MOCK_IMAGES[0], onClick: () => void }) => {
+const ImageCard = ({ data, onClick }: { key?: number; data: typeof MOCK_IMAGES[0], onClick: () => void }) => {
   return (
     <div 
       onClick={onClick}
@@ -347,109 +353,7 @@ const ImageCard = ({ data, onClick }: { data: typeof MOCK_IMAGES[0], onClick: ()
   );
 };
 
-const ImageModal = ({ 
-  image, 
-  onClose, 
-  onDeploy 
-}: { 
-  image: typeof MOCK_IMAGES[0] | null, 
-  onClose: () => void,
-  onDeploy: (img: typeof MOCK_IMAGES[0]) => void
-}) => {
-  if (!image) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity"
-        onClick={onClose}
-      ></div>
-      
-      {/* Modal Content */}
-      <div className="glass-panel neon-border rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden relative flex flex-col md:flex-row shadow-2xl animate-in zoom-in-95 duration-200">
-        
-        {/* Left: Media Area (Video/Image Placeholder) */}
-        <div className={`w-full md:w-1/2 h-64 md:h-auto relative bg-gradient-to-br ${image.gradient} flex items-center justify-center overflow-hidden`}>
-          <div className="absolute inset-0 opacity-40 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8cGF0aCBkPSJNMCAwTDggOFpNOCAwTDAgOFoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPjwvc3ZnPg==')]"></div>
-          
-          {/* Mock Video Player UI */}
-          <div className="relative z-10 w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-black/30 dark:border-white/30 cursor-pointer hover:scale-110 hover:bg-white/30 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-            <Play className="w-8 h-8 text-gray-900 dark:text-white ml-2" fill="currentColor" />
-          </div>
-          
-          <div className="absolute bottom-4 left-4 right-4 h-1 bg-white/20 rounded-full overflow-hidden">
-            <div className="h-full w-1/3 bg-white/80 rounded-full"></div>
-          </div>
-        </div>
-
-        {/* Right: Info & Actions */}
-        <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col relative bg-white/60 dark:bg-black/40 overflow-y-auto">
-          <button 
-            onClick={onClose}
-            className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors border border-black/10 dark:border-white/10"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          <div className="flex gap-2 mb-4">
-            {image.tags.map(tag => (
-              <span key={tag} className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-xs font-semibold text-cyan-400 uppercase tracking-wider">
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight pr-8">{image.title}</h2>
-          
-          <div className="flex items-center gap-3 mb-8 pb-6 border-b border-black/10 dark:border-white/10">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center border border-black/10 dark:border-white/10">
-              <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{image.author}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">官方认证发布者</p>
-            </div>
-          </div>
-
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">镜像介绍</h3>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm mb-6">
-              {image.description} 
-              此镜像经过深度优化，内置了常用的依赖库和工具链，旨在为您提供开箱即用的极致体验。无论是用于开发测试还是生产环境，都能保证极高的稳定性和运行效率。
-            </p>
-            
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl p-4">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">系统架构</p>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">x86_64 / ARM64</p>
-              </div>
-              <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl p-4">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">推荐配置</p>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">4核 8G</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-auto pt-6 flex items-center justify-between">
-            <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
-              <span className="flex items-center gap-2"><Download className="w-4 h-4" /> {image.downloads} 次部署</span>
-              <span className="flex items-center gap-2"><Heart className="w-4 h-4" /> {image.likes} 收藏</span>
-            </div>
-            
-            <button 
-              onClick={() => onDeploy(image)}
-              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(56,189,248,0.4)] hover:shadow-[0_0_30px_rgba(56,189,248,0.6)] flex items-center gap-2 hover:-translate-y-0.5"
-            >
-              <Play className="w-4 h-4" fill="currentColor" />
-              立即部署
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const InstanceDeployPage = ({ image, onBack }: { image: typeof MOCK_IMAGES[0] | null, onBack: () => void }) => {
   const [selectedGpu, setSelectedGpu] = useState('rtx-4090-d-24g');
@@ -644,234 +548,146 @@ const InstanceDeployPage = ({ image, onBack }: { image: typeof MOCK_IMAGES[0] | 
       <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-black/10 dark:border-white/10 p-4 z-40 flex items-center justify-center">
         <div className="max-w-3xl w-full flex items-center justify-between">
           <button className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-gray-900 dark:text-white rounded-xl font-medium transition-colors flex items-center gap-2 shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-            <CheckSquare className="w-5 h-5" /> 确认部署
+            <CheckSquare className="w-5 h-5" />
+            立即部署
           </button>
-          
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg px-4 py-2">
-              <Wallet className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <span className="text-sm text-gray-500 dark:text-gray-400">账户余额</span>
-              <span className="font-bold text-gray-900 dark:text-white">¥ 2.41</span>
-            </div>
-            <button className="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-gray-900 dark:text-white rounded-lg text-sm transition-colors">
-              充值
-            </button>
-          </div>
         </div>
       </div>
     </div>
   );
 };
 
-const InstancesPage = ({ onDeployNew }: { onDeployNew: () => void }) => {
+const MOCK_INSTANCES = [
+  {
+    id: 'inst-001',
+    name: 'Llama-3-70B-Server',
+    image: 'vLLM 0.4.0',
+    gpu: 'RTX 4090',
+    status: '运行中',
+    uptime: '2d 4h',
+    cost: '¥ 45.20',
+    createdAt: '2026-03-24 10:20:00',
+    cpu: '16 vCPU',
+    memory: '64GB',
+    disk: '100GB NVMe',
+    sshCommand: 'ssh root@192.168.1.105 -p 22022',
+    jupyterUrl: 'http://192.168.1.105:8888'
+  },
+  {
+    id: 'inst-002',
+    name: 'SDXL-Trainer',
+    image: 'PyTorch 2.2.0',
+    gpu: 'A100',
+    status: '已停止',
+    uptime: '-',
+    cost: '¥ 12.50',
+    createdAt: '2026-03-25 14:30:00',
+    cpu: '32 vCPU',
+    memory: '128GB',
+    disk: '500GB NVMe',
+    sshCommand: 'ssh root@192.168.1.106 -p 22022',
+    jupyterUrl: 'http://192.168.1.106:8888'
+  },
+  {
+    id: 'inst-003',
+    name: 'Dev-Environment',
+    image: 'Ubuntu 22.04',
+    gpu: 'A10',
+    status: '创建中',
+    uptime: '-',
+    cost: '¥ 0.00',
+    createdAt: '2026-03-27 02:15:00',
+    cpu: '8 vCPU',
+    memory: '32GB',
+    disk: '50GB NVMe',
+    sshCommand: 'ssh root@192.168.1.107 -p 22022',
+    jupyterUrl: 'http://192.168.1.107:8888'
+  }
+];
+
+const InstancesPage = ({ onDeployNew, onSelectInstance }: { onDeployNew: () => void, onSelectInstance: (instance: any) => void }) => {
   return (
     <div className="max-w-7xl mx-auto w-full animate-in fade-in duration-500 space-y-6">
-      {/* Top Section: Recent Images */}
-      <div>
-        <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">最近储存的镜像</h2>
-        <div className="flex items-center gap-4">
-          <button className="px-6 py-3 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl text-sm text-gray-600 dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex items-center gap-2">
-            查看账号内所有镜像 <ChevronRight className="w-4 h-4" />
-          </button>
-          <span className="text-sm text-gray-500 dark:text-gray-400">暂无私有镜像</span>
+      {/* Top Section */}
+      <div className="flex items-center justify-between">
+        <div className="relative w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input 
+            type="text" 
+            placeholder="搜索实例名称..." 
+            className="w-full bg-white/5 border border-black/10 dark:border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyan-500/50"
+          />
         </div>
-      </div>
-
-      {/* Action Buttons & Warning */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <button className="px-4 py-2 bg-white/5 border border-black/10 dark:border-white/10 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex items-center gap-2">
+            <Filter className="w-4 h-4" /> 筛选
+          </button>
           <button 
             onClick={onDeployNew}
-            className="px-5 py-2.5 bg-green-500/10 border border-green-500/50 text-green-400 rounded-full text-sm font-medium hover:bg-green-500/20 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(74,222,128,0.15)]"
+            className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
           >
             <Plus className="w-4 h-4" /> 部署新实例
           </button>
-          <button className="px-5 py-2.5 bg-red-500/10 border border-red-500/50 text-red-400 rounded-full text-sm font-medium hover:bg-red-500/20 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(248,113,113,0.15)]">
-            <Timer className="w-4 h-4" /> 全局定时关机
-          </button>
-        </div>
-        
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-3 max-w-2xl">
-          <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-red-200/80 leading-relaxed">
-            请勿使用 AI 模型生成违法违规、涉黄涉暴、违背公序良俗的内容以及进行虚拟货币相关业务！<br/>
-            一经发现或收到检举投诉，将直接封禁账号留存取证，并将相关数据、IP记录等信息提供至有关部门。
-          </p>
         </div>
       </div>
 
-      {/* Instance Card */}
-      <div className="glass-panel neon-border rounded-xl overflow-hidden flex flex-col">
-        <div className="flex flex-col lg:flex-row">
-          {/* Left Column: Basic Info */}
-          <div className="w-full lg:w-72 p-5 border-b lg:border-b-0 lg:border-r border-black/10 dark:border-white/10 bg-white/40 dark:bg-black/20 space-y-5">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                <Server className="w-4 h-4" /> 实例名
-              </div>
-              <div className="flex items-center gap-2 text-gray-900 dark:text-white font-medium">
-                6FBLFXJOOIZOPZ2D <Edit2 className="w-3.5 h-3.5 text-gray-400 hover:text-cyan-500 dark:hover:text-cyan-400 cursor-pointer transition-colors" />
-              </div>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                <Layers className="w-4 h-4" /> 实例 ID
-              </div>
-              <div className="flex items-center gap-2 text-gray-900 dark:text-white font-medium">
-                6FBLFXJOOIZOPZ2D <Copy className="w-3.5 h-3.5 text-gray-400 hover:text-cyan-500 dark:hover:text-cyan-400 cursor-pointer transition-colors" />
-              </div>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                <Cpu className="w-4 h-4" /> GPU
-              </div>
-              <div className="text-gray-900 dark:text-white font-medium">
-                RTX 4090 D <span className="text-gray-400 font-normal mx-1">x</span> 1
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                  <HardDrive className="w-4 h-4" /> 系统磁盘
-                </div>
-                <div className="text-gray-900 dark:text-white font-medium">
-                  28%
-                </div>
-              </div>
-              <div className="w-full h-1.5 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-cyan-500 rounded-full" style={{ width: '28%' }}></div>
-              </div>
-              <div className="text-right text-xs text-gray-500 dark:text-gray-400">
-                剩余可用 99.94 GB
-              </div>
-            </div>
-          </div>
-
-          {/* Middle Column: Image & Status */}
-          <div className="flex-1 p-5 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-black/10 dark:border-white/10">
-            <div>
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                <Layers className="w-4 h-4" /> 系统镜像 <span className="text-gray-700 dark:text-gray-200 ml-2 font-medium">基础镜像</span>
-              </div>
-              <div className="flex items-center gap-4 bg-white dark:bg-white/5 rounded-xl p-3 border border-black/10 dark:border-white/10 shadow-sm">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-xl font-bold text-white shadow-inner">
-                  C
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 text-gray-900 dark:text-white font-medium">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" /> ComfyUI_v0.18.2_纯净版
+      {/* Table */}
+      <div className="bg-white/40 dark:bg-[#1a1a1a] border border-black/10 dark:border-white/10 rounded-2xl overflow-hidden">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-black/5 dark:bg-white/5 text-gray-500 dark:text-gray-400">
+            <tr>
+              <th className="px-6 py-4 font-medium">实例名称</th>
+              <th className="px-6 py-4 font-medium">镜像</th>
+              <th className="px-6 py-4 font-medium">GPU 规格</th>
+              <th className="px-6 py-4 font-medium">状态</th>
+              <th className="px-6 py-4 font-medium">运行时长</th>
+              <th className="px-6 py-4 font-medium">累计费用</th>
+              <th className="px-6 py-4 font-medium">创建时间</th>
+              <th className="px-6 py-4 font-medium text-right">操作</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-black/5 dark:divide-white/5">
+            {MOCK_INSTANCES.map((instance) => (
+              <tr 
+                key={instance.id} 
+                className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer group"
+                onClick={() => onSelectInstance(instance)}
+              >
+                <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{instance.name}</td>
+                <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{instance.image}</td>
+                <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{instance.gpu}</td>
+                <td className="px-6 py-4">
+                  <span className={`px-2 py-1 rounded text-xs font-medium border ${
+                    instance.status === '运行中' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                    instance.status === '已停止' ? 'bg-gray-500/10 text-gray-500 border-gray-500/20' :
+                    'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                  }`}>
+                    {instance.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{instance.uptime}</td>
+                <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{instance.cost}</td>
+                <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs">{instance.createdAt}</td>
+                <td className="px-6 py-4 text-right">
+                  <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                    <button className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="打开 JupyterLab">
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="重启">
+                      <RotateCw className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 bg-yellow-500/10 hover:bg-yellow-500/20 rounded-lg text-yellow-500 transition-colors" title="停止">
+                      <Square className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg text-red-500 transition-colors" title="销毁">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">未安装节点，不适合新手使用。</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                <span className="flex items-center gap-1.5"><Cpu className="w-4 h-4" /> 系统状态</span>
-                <span className="flex items-center gap-1.5"><MonitorPlay className="w-4 h-4 text-green-500" /> GPU 状态</span>
-              </div>
-              <div className="flex items-center gap-4">
-                {/* Circular progress indicators */}
-                <div className="w-14 h-14 rounded-full border-[3px] border-blue-100 dark:border-blue-500/20 flex flex-col items-center justify-center text-[10px] relative">
-                  <div className="absolute inset-0 rounded-full border-[3px] border-blue-500 border-r-transparent border-b-transparent border-l-transparent rotate-45"></div>
-                  <span className="text-gray-500 dark:text-gray-400">CPU</span>
-                  <span className="text-gray-900 dark:text-white font-bold text-xs">0%</span>
-                </div>
-                <div className="w-14 h-14 rounded-full border-[3px] border-blue-100 dark:border-blue-500/20 flex flex-col items-center justify-center text-[10px] relative">
-                  <div className="absolute inset-0 rounded-full border-[3px] border-blue-500 border-r-transparent border-b-transparent border-l-transparent rotate-90"></div>
-                  <span className="text-gray-500 dark:text-gray-400">内存</span>
-                  <span className="text-gray-900 dark:text-white font-bold text-xs">1.4%</span>
-                </div>
-                <div className="w-14 h-14 rounded-full border-[3px] border-green-100 dark:border-green-500/20 flex flex-col items-center justify-center text-[10px] relative">
-                  <div className="absolute inset-0 rounded-full border-[3px] border-green-500 border-r-transparent border-b-transparent border-l-transparent rotate-12"></div>
-                  <span className="text-gray-500 dark:text-gray-400">GPU-1</span>
-                  <span className="text-gray-900 dark:text-white font-bold text-xs">0%</span>
-                </div>
-                <div className="w-14 h-14 rounded-full border-[3px] border-green-100 dark:border-green-500/20 flex flex-col items-center justify-center text-[10px] relative">
-                  <div className="absolute inset-0 rounded-full border-[3px] border-green-500 border-r-transparent border-b-transparent border-l-transparent rotate-[60deg]"></div>
-                  <span className="text-gray-500 dark:text-gray-400">显存-1</span>
-                  <span className="text-gray-900 dark:text-white font-bold text-xs">1%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Services */}
-          <div className="w-full lg:w-80 p-5 flex flex-col gap-6 bg-white/40 dark:bg-black/20">
-            <div>
-              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1.5">
-                <Settings className="w-3.5 h-3.5" /> 系统服务
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button className="px-3 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-orange-500" /> Jupyter
-                </button>
-                <button className="px-3 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                  <MonitorPlay className="w-3.5 h-3.5 text-green-500" /> VNC
-                </button>
-                <button className="px-3 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-blue-500" /> SSH
-                </button>
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-1.5">
-                <Box className="w-3.5 h-3.5" /> 镜像自定义服务
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button className="px-3 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                  <div className="w-3.5 h-3.5 bg-blue-600 rounded-sm flex items-center justify-center text-[8px] font-bold text-yellow-400">C</div> ComfyUI
-                </button>
-                <button className="px-3 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-pink-500" /> ComfyUI日志
-                </button>
-                <button className="px-3 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                  <FolderOpen className="w-3.5 h-3.5 text-red-500" /> 文件管理
-                </button>
-                <button className="px-3 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                  <Trash2 className="w-3.5 h-3.5 text-yellow-500" /> 删除输出文件
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Row: Actions & Status */}
-        <div className="p-4 border-t border-black/10 dark:border-white/10 bg-white/60 dark:bg-black/40 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-green-500 font-medium text-sm bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> 运行中
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="px-4 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-full text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                <Power className="w-3.5 h-3.5 text-red-500" /> 关机
-              </button>
-              <button className="px-4 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-full text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                <RefreshCw className="w-3.5 h-3.5 text-blue-500" /> 重启
-              </button>
-              <button className="px-4 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-full text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-400/50 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm flex items-center gap-1.5">
-                <Save className="w-3.5 h-3.5 text-green-500" /> 储存镜像
-              </button>
-              <button className="px-4 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-full text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-500/30 transition-all shadow-sm flex items-center gap-1.5">
-                <Trash2 className="w-3.5 h-3.5" /> 销毁
-              </button>
-              <button className="px-4 py-1.5 bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-full text-xs text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 hover:border-orange-500/30 transition-all shadow-sm flex items-center gap-1.5">
-                <Timer className="w-3.5 h-3.5" /> 定时关机
-              </button>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="text-gray-500 dark:text-gray-400 text-xs flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" /> 已运行 <span className="text-gray-900 dark:text-white font-mono font-medium">02:15:30</span>
-            </div>
-            <div className="w-px h-4 bg-black/10 dark:border-white/10"></div>
-            <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400 bg-white dark:bg-white/5 px-2 py-1 rounded border border-black/10 dark:border-white/10 text-xs shadow-sm">
-              <CreditCard className="w-3 h-3" /> 按量计费
-            </span>
-            <span className="font-bold text-gray-900 dark:text-white">¥ 1.59 <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">/小时</span></span>
-          </div>
-        </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
@@ -1372,7 +1188,7 @@ const BannerCarousel = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-[280px] rounded-2xl overflow-hidden mb-8 group">
+    <div className="relative w-full h-[140px] rounded-2xl overflow-hidden mb-8 group">
       {BANNERS.map((banner, index) => (
         <div
           key={banner.id}
@@ -1387,7 +1203,7 @@ const BannerCarousel = () => {
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent flex flex-col justify-center px-12">
-            <h2 className="text-3xl font-bold text-white mb-3 tracking-tight transform translate-y-0 transition-transform duration-700">
+            <h2 className="text-2xl font-bold text-white mb-2 tracking-tight transform translate-y-0 transition-transform duration-700">
               {banner.title}
             </h2>
             <p className="text-gray-300 text-sm max-w-md">
@@ -1446,6 +1262,7 @@ export default function App() {
   
   // Modal State
   const [selectedImage, setSelectedImage] = useState<typeof MOCK_IMAGES[0] | null>(null);
+  const [selectedInstance, setSelectedInstance] = useState<any | null>(null);
   
   // Deploy State
   const [deployImage, setDeployImage] = useState<typeof MOCK_IMAGES[0] | null>(null);
@@ -1474,7 +1291,7 @@ export default function App() {
         />
         
         <div className="flex-1 p-8 z-0 w-full">
-          {activeMenu === 'home' && (
+          {activeMenu === 'home' && !selectedImage && (
             <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
               {/* Header section replaced by Banner Carousel */}
               <BannerCarousel />
@@ -1505,9 +1322,29 @@ export default function App() {
             </div>
           )}
 
+          {activeMenu === 'home' && selectedImage && (
+            <ImageDetailPage 
+              image={selectedImage} 
+              onBack={() => setSelectedImage(null)} 
+              onDeploy={handleDeploy} 
+            />
+          )}
+
           {activeMenu === 'images' && <MyImagesPage />}
 
-          {activeMenu === 'instances' && <InstancesPage onDeployNew={() => setActiveMenu('deploy')} />}
+          {activeMenu === 'instances' && !selectedInstance && (
+            <InstancesPage 
+              onDeployNew={() => setActiveMenu('deploy')} 
+              onSelectInstance={(instance) => setSelectedInstance(instance)}
+            />
+          )}
+
+          {activeMenu === 'instances' && selectedInstance && (
+            <InstanceDetailPage 
+              instance={selectedInstance} 
+              onBack={() => setSelectedInstance(null)} 
+            />
+          )}
 
           {activeMenu === 'deploy' && (
             <InstanceDeployPage 
@@ -1522,13 +1359,6 @@ export default function App() {
 
         </div>
       </main>
-
-      {/* Image Detail Modal */}
-      <ImageModal 
-        image={selectedImage} 
-        onClose={() => setSelectedImage(null)} 
-        onDeploy={handleDeploy} 
-      />
     </div>
   );
 }
